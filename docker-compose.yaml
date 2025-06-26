@@ -1,0 +1,45 @@
+# nginx proxy address - http://172.17.0.1:61004
+
+name: whoogle
+x-logging: &default-logging
+  options:
+    max-size: '5m'
+    max-file: '1'
+  driver: json-file
+
+services:
+  app:
+    image: benbusby/whoogle-search:latest
+    hostname: ${BASE_HOST_NAME:-$HOSTNAME}
+    container_name: whoogle-app
+    restart: always
+    pull_policy: always
+    init: true
+    user: '927:927'
+    logging: *default-logging
+    environment:
+      - WHOOGLE_CSP=1
+      - WHOOGLE_DOTENV=1
+      - WHOOGLE_AUTOCOMPLETE=1
+      - WHOOGLE_CONFIG_COUNTRY=US
+      - WHOOGLE_CONFIG_THEME=dark
+      - WHOOGLE_RESULTS_PER_PAGE=50
+      - WHOOGLE_CONFIG_VIEW_IMAGE=true
+      - WHOOGLE_CONFIG_LANGUAGE=lang_en
+      - WHOOGLE_CONFIG_SEARCH_LANGUAGE=lang_en
+      - WHOOGLE_CONFIG_URL=https://${BASE_DOMAIN_NAME:-$BASE_HOST_NAME}/
+      - WHOOGLE_CONFIG_PREFERENCES_KEY="${APP_API_TOKEN:-TM2G8X9n6wFUOkbQ}"
+    ports:
+      - '172.17.0.1:61004:5000'
+    volumes:
+      - './rootfs/config/whoogle:/config'
+    tmpfs:
+      - /run/tor/:size=5M,uid=927,gid=927,mode=1700
+      - /var/lib/tor/:size=15M,uid=927,gid=927,mode=1700
+    networks:
+      - whoogle
+
+networks:
+  whoogle:
+    name: whoogle
+    external: false
