@@ -1,34 +1,58 @@
-# nginx proxy address - http://172.17.0.1:61004
+# Whoogle Search - Privacy-respecting Google search proxy
+# Access URL: http://172.17.0.1:61004
 
 name: whoogle
+version: '3.8'
+
 x-logging: &default-logging
-  options:
-    max-size: '5m'
-    max-file: '1'
   driver: json-file
+  options:
+    max-size: '10m'
+    max-file: '3'
 
 services:
   app:
     image: benbusby/whoogle-search:latest
     hostname: ${BASE_HOST_NAME:-$HOSTNAME}
-    container_name: whoogle-app
-    restart: always
+    container_name: whoogle-search
+    restart: unless-stopped
     pull_policy: always
     init: true
     user: '927:927'
     logging: *default-logging
     environment:
+      # Core Settings
       - WHOOGLE_CSP=1
       - WHOOGLE_DOTENV=1
       - WHOOGLE_AUTOCOMPLETE=1
+      
+      # Regional Settings
       - WHOOGLE_CONFIG_COUNTRY=US
-      - WHOOGLE_CONFIG_THEME=dark
-      - WHOOGLE_RESULTS_PER_PAGE=50
-      - WHOOGLE_CONFIG_VIEW_IMAGE=true
       - WHOOGLE_CONFIG_LANGUAGE=lang_en
       - WHOOGLE_CONFIG_SEARCH_LANGUAGE=lang_en
+      
+      # UI Configuration
+      - WHOOGLE_CONFIG_THEME=dark
+      - WHOOGLE_RESULTS_PER_PAGE=20
+      - WHOOGLE_CONFIG_VIEW_IMAGE=1
+      - WHOOGLE_CONFIG_NEW_TAB=1
+      - WHOOGLE_CONFIG_GET_ONLY=1
+      - WHOOGLE_CONFIG_SAFE_KEYS=1
+      
+      # Image Search Configuration
+      - WHOOGLE_CONFIG_IMAGES=1
+      - WHOOGLE_ALT_IMG=1
+      
+      # Privacy & Security
+      - WHOOGLE_CONFIG_DISABLE_FEATURES=0
+      - WHOOGLE_CONFIG_BLOCK_ADS=1
+      - WHOOGLE_CONFIG_BLOCK_CSS=0
+      - WHOOGLE_CONFIG_BLOCK_JS=0
+      
+      # Application Configuration
       - WHOOGLE_CONFIG_URL=https://${BASE_DOMAIN_NAME:-$BASE_HOST_NAME}/
       - WHOOGLE_CONFIG_PREFERENCES_KEY="${APP_API_TOKEN:-TM2G8X9n6wFUOkbQ}"
+      
     ports:
       - '172.17.0.1:61004:5000'
     volumes:
@@ -38,6 +62,12 @@ services:
       - /var/lib/tor/:size=15M,uid=927,gid=927,mode=1700
     networks:
       - whoogle
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
 networks:
   whoogle:
