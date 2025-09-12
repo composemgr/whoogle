@@ -17,7 +17,6 @@ services:
     restart: always
     pull_policy: always
     init: true
-    user: '927:927'
     logging: *default-logging
     environment:
       # Core Settings
