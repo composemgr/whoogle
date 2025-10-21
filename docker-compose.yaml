@@ -20,9 +20,13 @@ services:
     logging: *default-logging
     environment:
       # Core Settings
+      - HTTPS_ONLY=1
       - WHOOGLE_CSP=1
-      - WHOOGLE_DOTENV=1
+      - WHOOGLE_HTTP2=1
+      - WHOOGLE_DOTENV=0
       - WHOOGLE_AUTOCOMPLETE=1
+      - WHOOGLE_CONFIG_USE_LETA=1
+      - WHOOGLE_CONFIG_ANON_VIEW=1
 
       # Regional Settings
       - WHOOGLE_CONFIG_COUNTRY=US
@@ -31,15 +35,15 @@ services:
 
       # UI Configuration
       - WHOOGLE_CONFIG_THEME=dark
-      - WHOOGLE_RESULTS_PER_PAGE=20
-      - WHOOGLE_CONFIG_VIEW_IMAGE=1
+      - WHOOGLE_RESULTS_PER_PAGE=50
       - WHOOGLE_CONFIG_NEW_TAB=1
-      - WHOOGLE_CONFIG_GET_ONLY=1
+      - WHOOGLE_CONFIG_GET_ONLY=0
       - WHOOGLE_CONFIG_SAFE_KEYS=1
 
       # Image Search Configuration
       - WHOOGLE_CONFIG_IMAGES=1
-      - WHOOGLE_ALT_IMG=1
+      - WHOOGLE_CONFIG_VIEW_IMAGE=1
+      - WHOOGLE_SHOW_FAVICONS=1
 
       # Privacy & Security
       - WHOOGLE_CONFIG_DISABLE_FEATURES=0
@@ -47,10 +51,11 @@ services:
       - WHOOGLE_CONFIG_BLOCK_CSS=0
       - WHOOGLE_CONFIG_BLOCK_JS=0
 
-      # Application Configuration
-      - WHOOGLE_CONFIG_URL=https://${BASE_DOMAIN_NAME:-$BASE_HOST_NAME}/
-      - WHOOGLE_CONFIG_PREFERENCES_KEY="${APP_API_TOKEN:-TM2G8X9n6wFUOkbQ}"
-      
+        # Application Configuration
+      - "WHOOGLE_CONFIG_URL=https://${BASE_DOMAIN_NAME:-$BASE_HOST_NAME}/"
+      - WHOOGLE_CONFIG_PREFERENCES_ENCRYPTED=1
+      - "WHOOGLE_CONFIG_PREFERENCES_KEY=${APP_API_TOKEN:-TM2G8X9n6wFUOkbQ}"
+
       # Browser Spoofing & Anti-Detection
       - WHOOGLE_USER_AGENT="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
       - WHOOGLE_PROXY_TYPE=
