@@ -25,7 +25,6 @@ services:
       - WHOOGLE_HTTP2=1
       - WHOOGLE_DOTENV=0
       - WHOOGLE_AUTOCOMPLETE=1
-      - WHOOGLE_CONFIG_USE_LETA=1
       - WHOOGLE_CONFIG_ANON_VIEW=1
 
       # Regional Settings
