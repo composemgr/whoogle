@@ -1,8 +1,22 @@
 {
   "permissions": {
     "allow": [
-      "Bash(ls:*)"
+      "Read(**)",
+      "Write(**)",
+      "Bash(:*:*)",
+      "Bash(curl:*)",
+      "Bash(mkdir:*)",
+      "WebSearch",
+      "WebFetch(domain:github.com)",
+      "Bash(docker compose:*)"
     ],
-    "deny": []
+    "deny": [
+      "Bash(git commit:*)",
+      "Bash(git commit :*)"
+    ]
+  },
+  "model": "sonnet",
+  "preferences": {
+    "auto_commit": false
   }
 }

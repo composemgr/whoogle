@@ -51,6 +51,9 @@ services:
       - WHOOGLE_CONFIG_BLOCK_CSS=0
       - WHOOGLE_CONFIG_BLOCK_JS=0
 
+      # Custom CSS for centered layout
+      - "WHOOGLE_CONFIG_STYLE=body { display: flex; justify-content: center; } #main { max-width: 1200px; width: 100%; margin: 0 auto; } .results { max-width: 1200px; margin: 0 auto; }"
+
         # Application Configuration
       - "WHOOGLE_CONFIG_URL=https://${BASE_DOMAIN_NAME:-$BASE_HOST_NAME}/"
       - WHOOGLE_CONFIG_PREFERENCES_ENCRYPTED=1
