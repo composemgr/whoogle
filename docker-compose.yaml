@@ -1,0 +1,85 @@
+# Whoogle Search - Privacy-respecting Google search proxy
+# Access URL: http://172.17.0.1:61004
+
+name: whoogle
+
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: '10m'
+    max-file: '3'
+
+services:
+  app:
+    image: benbusby/whoogle-search:latest
+    hostname: ${BASE_HOST_NAME:-$HOSTNAME}
+    container_name: whoogle-app
+    restart: always
+    pull_policy: always
+    init: true
+    logging: *default-logging
+    environment:
+      # Core Settings
+      HTTPS_ONLY: 1
+      WHOOGLE_CSP: 1
+      WHOOGLE_HTTP2: 1
+      WHOOGLE_DOTENV: 0
+      WHOOGLE_AUTOCOMPLETE: 1
+      WHOOGLE_CONFIG_ANON_VIEW: 1
+
+      # Regional Settings
+      WHOOGLE_CONFIG_COUNTRY: US
+      WHOOGLE_CONFIG_LANGUAGE: lang_en
+      WHOOGLE_CONFIG_SEARCH_LANGUAGE: lang_en
+
+      # UI Configuration
+      WHOOGLE_CONFIG_THEME: dark
+      WHOOGLE_RESULTS_PER_PAGE: 50
+      WHOOGLE_CONFIG_NEW_TAB: 1
+      WHOOGLE_CONFIG_GET_ONLY: 0
+      WHOOGLE_CONFIG_SAFE_KEYS: 1
+
+      # Image Search Configuration
+      WHOOGLE_CONFIG_IMAGES: 1
+      WHOOGLE_CONFIG_VIEW_IMAGE: 1
+      WHOOGLE_SHOW_FAVICONS: 1
+
+      # Privacy & Security
+      WHOOGLE_CONFIG_DISABLE_FEATURES: 0
+      WHOOGLE_CONFIG_BLOCK_ADS: 1
+      WHOOGLE_CONFIG_BLOCK_CSS: 0
+      WHOOGLE_CONFIG_BLOCK_JS: 0
+
+      # Custom CSS for centered layout
+      - "WHOOGLE_CONFIG_STYLE=body { display: flex; justify-content: center; } #main { max-width: 1200px; width: 100%; margin: 0 auto; } .results { max-width: 1200px; margin: 0 auto; }"
+
+        # Application Configuration
+      - "WHOOGLE_CONFIG_URL=https://${BASE_DOMAIN_NAME:-$BASE_HOST_NAME}/"
+      WHOOGLE_CONFIG_PREFERENCES_ENCRYPTED: 1
+      - "WHOOGLE_CONFIG_PREFERENCES_KEY=${APP_API_TOKEN:-TM2G8X9n6wFUOkbQ}"
+
+      # Browser Spoofing & Anti-Detection
+      WHOOGLE_USER_AGENT: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+      WHOOGLE_PROXY_TYPE: 
+      WHOOGLE_PROXY_LOC: 
+
+    ports:
+      - '172.17.0.1:61004:5000'
+    volumes:
+      - './rootfs/config/whoogle:/config'
+    tmpfs:
+      - /run/tor/:size=5M,uid=927,gid=927,mode=1700
+      - /var/lib/tor/:size=15M,uid=927,gid=927,mode=1700
+    networks:
+      - whoogle
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  whoogle:
+    name: whoogle
+    external: false
