@@ -1,6 +1,9 @@
-# gitignore created on 05/22/25 at 21:00
+# gitignore created on 01/21/26 at 17:09
 # Disable reminder in prompt
 ignoredirmessage
+
+# ignore .build_failed files
+**/.build_failed*
 
 # OS generated files
 ### Linux ###
@@ -105,21 +108,16 @@ $RECYCLE.BIN/
 # Ignore the file: app.env
 app.env
 
-# Ignore the file: compose.default.yaml
-compose.default.yaml
-
 # ignore the default dotenv file
 default.env
 
-# Exclude the rootfs dir
-rootfs
+# Ignore the file: compose.default.yaml
+compose.default.yaml
 
 # Exclude compose.yaml just in case it has sensitive data
+compose.yml
 compose.yaml
 
 # Exclude the rootfs dir
 rootfs
-
-# Exclude compose.yaml just in case it has sensitive data
-compose.yaml
 
