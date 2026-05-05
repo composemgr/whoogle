@@ -66,7 +66,7 @@ services:
     ports:
       - '172.17.0.1:61004:5000'
     volumes:
-      - './rootfs/config/whoogle:/config'
+      - './volumes/config/whoogle:/config'
     tmpfs:
       - /run/tor/:size=5M,uid=927,gid=927,mode=1700
       - /var/lib/tor/:size=15M,uid=927,gid=927,mode=1700
