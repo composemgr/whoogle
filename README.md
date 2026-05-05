@@ -41,8 +41,8 @@ BASE_DOMAIN_NAME=
 
 ## 📂 Volumes
 
-- `./rootfs/config/whoogle` - Configuration files
-- `./rootfs/data/whoogle` - Application data
+- `./volumes/config/whoogle` - Configuration files
+- `./volumes/data/whoogle` - Application data
 
 ## 🔐 Security
 
