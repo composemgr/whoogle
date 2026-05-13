@@ -51,17 +51,17 @@ services:
       WHOOGLE_CONFIG_BLOCK_JS: 0
 
       # Custom CSS for centered layout
-      - "WHOOGLE_CONFIG_STYLE=body { display: flex; justify-content: center; } #main { max-width: 1200px; width: 100%; margin: 0 auto; } .results { max-width: 1200px; margin: 0 auto; }"
+      WHOOGLE_CONFIG_STYLE: "body { display: flex; justify-content: center; } #main { max-width: 1200px; width: 100%; margin: 0 auto; } .results { max-width: 1200px; margin: 0 auto; }"
 
-        # Application Configuration
-      - "WHOOGLE_CONFIG_URL=https://${BASE_DOMAIN_NAME:-$BASE_HOST_NAME}/"
+      # Application Configuration
+      WHOOGLE_CONFIG_URL: https://${BASE_DOMAIN_NAME:-example.com}/
       WHOOGLE_CONFIG_PREFERENCES_ENCRYPTED: 1
-      - "WHOOGLE_CONFIG_PREFERENCES_KEY=${APP_API_TOKEN:-TM2G8X9n6wFUOkbQ}"
+      WHOOGLE_CONFIG_PREFERENCES_KEY: ${APP_API_TOKEN:-changeme_secret_key_min_32_chars}
 
       # Browser Spoofing & Anti-Detection
       WHOOGLE_USER_AGENT: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-      WHOOGLE_PROXY_TYPE: 
-      WHOOGLE_PROXY_LOC: 
+      WHOOGLE_PROXY_TYPE: ${WHOOGLE_PROXY_TYPE:-}
+      WHOOGLE_PROXY_LOC: ${WHOOGLE_PROXY_LOC:-}
 
     ports:
       - '172.17.0.1:61004:5000'
