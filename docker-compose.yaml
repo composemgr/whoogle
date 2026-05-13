@@ -1,5 +1,4 @@
-# Whoogle Search - Privacy-respecting Google search proxy
-# Access URL: http://172.17.0.1:61004
+# nginx proxy address - http://172.17.0.1:61004
 
 name: whoogle
 
@@ -63,6 +62,9 @@ services:
       WHOOGLE_PROXY_TYPE: ${WHOOGLE_PROXY_TYPE:-}
       WHOOGLE_PROXY_LOC: ${WHOOGLE_PROXY_LOC:-}
 
+      CONTAINER_NAME: whoogle-app
+      HOSTNAME: ${BASE_HOST_NAME:-$HOSTNAME}
+
     ports:
       - '172.17.0.1:61004:5000'
     volumes:
@@ -72,14 +74,36 @@ services:
       - /var/lib/tor/:size=15M,uid=927,gid=927,mode=1700
     networks:
       - whoogle
+      - proxy
+      - cloudflare
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5000/healthz"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
+    labels:
+      - 'traefik.enable=true'
+      - 'cloudflare.enable=true'
+      - 'traefik.docker.network=proxy'
+      - 'cloudflare.service=http://whoogle-app:5000'
+      - 'cloudflare.hostname=whoogle.${CLOUDFLARE_ZONE_NAME:-}'
+      - 'traefik.http.routers.whoogle-app.entrypoints=http'
+      - 'traefik.http.routers.whoogle-app-secure.tls=true'
+      - 'traefik.http.routers.whoogle-app.rule=Host($(${BASE_HOST_NAME:-$HOSTNAME}))'
+      - 'traefik.http.middlewares.whoogle-app-https-redirect.redirectscheme.scheme=https'
+      - 'traefik.http.routers.whoogle-app.middlewares=whoogle-app-https-redirect'
+      - 'traefik.http.routers.whoogle-app-secure.entrypoints=https'
+      - 'traefik.http.routers.whoogle-app-secure.rule=Host($(${BASE_HOST_NAME:-$HOSTNAME}))'
+      - 'traefik.http.routers.whoogle-app-secure.tls.certresolver=cloudflare'
+      - 'traefik.http.routers.whoogle-app-secure.service=whoogle-app'
+      - 'traefik.http.services.whoogle-app.loadbalancer.server.port=5000'
 
 networks:
   whoogle:
     name: whoogle
     external: false
+  proxy:
+    external: true
+  cloudflare:
+    external: true
