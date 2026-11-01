@@ -1,27 +1,35 @@
 ## 👋 Welcome to whoogle 🚀
 
-whoogle - Self-hosted Docker Compose deployment
+Self-hosted Google search front end with Tor support
 
 ## 📋 Description
 
-Whoogle is a containerized service deployed using Docker Compose. This setup provides a complete, production-ready deployment with proper security defaults, logging, and configuration management.
+Whoogle is a self-hostable Google search front end that returns results
+without tracking, ads, or Google cookies. This stack runs the official
+Whoogle container, including its bundled Tor support, behind the host
+nginx proxy.
+
+## 🚀 Services
+
+- **app**: benbusby/whoogle-search:latest
 
 ## 📦 Installation
 
-### Using curl
-```shell
+### Option 1: Quick Install
+```bash
 curl -q -LSsf "https://raw.githubusercontent.com/composemgr/whoogle/main/docker-compose.yaml" -o compose.yml
 ```
 
-### Using git
-```shell
+### Option 2: Git Clone
+```bash
 git clone "https://github.com/composemgr/whoogle" ~/.local/srv/docker/whoogle
 cd ~/.local/srv/docker/whoogle
-docker compose up -d
+cp default.env .env
+docker compose --env-file .env up -d
 ```
 
-### Using composemgr
-```shell
+### Option 3: Using composemgr
+```bash
 composemgr install whoogle
 ```
 
@@ -31,53 +39,94 @@ composemgr install whoogle
 
 ```shell
 TZ=America/New_York
-BASE_HOST_NAME=${HOSTNAME}
-BASE_DOMAIN_NAME=
+APP_SECRET_KEY=replace-with-a-random-32-byte-hex-string
+WHOOGLE_CONFIG_COUNTRY=US
+WHOOGLE_CONFIG_THEME=dark
+WHOOGLE_PROXY_TYPE=
+```
+
+See `docker-compose.yaml` for complete list of configurable options.
+
+### Environment Files
+
+`default.env.sample` holds the full set of variables and is copied to `.env`
+before starting the stack:
+
+```bash
+cp default.env .env
+docker compose --env-file .env up -d
+```
+
+`app.env.sample` holds the app-specific overrides and is copied to `app.env`:
+
+```bash
+cp app.env.sample app.env
+```
+
+`composemgr up` applies `app.env` and `default.env` automatically. Raw
+`docker compose` commands need `--env-file .env` to pick up the same values.
+
+### Reverse Proxy
+
+Three standalone compose files ship in this repo:
+
+| File | Use |
+|------|-----|
+| `docker-compose.yaml` | Default, published on `172.17.0.1:64387` |
+| `docker-compose.traefik.yaml` | Behind an existing external `traefik` network |
+| `docker-compose.tunnel.yaml` | Behind an existing external `cloudflare` tunnel network |
+
+```bash
+docker compose -f docker-compose.traefik.yaml --env-file .env up -d
 ```
 
 ## 🌐 Access
 
-- **Web Interface**: http://172.17.0.1:
+- **Web Interface**: http://172.17.0.1:64387
 
 ## 📂 Volumes
 
-- `./volumes/config/whoogle` - Configuration files
-- `./volumes/data/whoogle` - Application data
+- `./volumes/config/whoogle` - Whoogle configuration directory
 
 ## 🔐 Security
 
-- Change default passwords after first login
-- Use HTTPS via reverse proxy in production
-- Configure authentication as needed
+- Set `APP_SECRET_KEY` to a random 32 character or longer value, it encrypts
+  saved search preferences
+- `HTTPS_ONLY` and `WHOOGLE_CSP` are enabled by default, keep them that way
+  behind a reverse proxy
+- Use HTTPS via the reverse proxy in production
+- Regularly update Docker images for security patches
 
 ## 🔍 Logging
 
 ```shell
-docker compose logs -f
+docker compose --env-file .env logs -f app
 ```
 
 ## 🛠️ Management
 
-### Start services
-```shell
-docker compose up -d
-```
+```bash
+# Start services
+docker compose --env-file .env up -d
 
-### Stop services
-```shell
-docker compose down
-```
+# Stop services
+docker compose --env-file .env down
 
-### Update images
-```shell
-docker compose pull && docker compose up -d
+# Update to latest images
+docker compose --env-file .env pull && docker compose --env-file .env up -d
+
+# View logs
+docker compose --env-file .env logs -f
+
+# Restart services
+docker compose --env-file .env restart
 ```
 
 ## 📋 Requirements
 
 - Docker Engine 20.10+
 - Docker Compose V2+
-- Sufficient disk space for data and logs
+- Enough memory for the bundled Tor process
 
 ## 🤝 Author
 

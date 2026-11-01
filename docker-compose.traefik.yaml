@@ -1,0 +1,88 @@
+name: whoogle
+x-logging: &default-logging
+  options:
+    max-size: '5m'
+    max-file: '1'
+  driver: json-file
+
+services:
+  app:
+    image: benbusby/whoogle-search:latest
+    container_name: whoogle-app
+    domainname: ${BASE_DOMAIN_NAME:-example.com}
+    hostname: ${BASE_HOST_NAME:-$HOSTNAME}
+    restart: always
+    pull_policy: always
+    init: true
+    logging: *default-logging
+    environment:
+      TZ: ${TZ:-America/New_York}
+      CONTAINER_NAME: whoogle-app
+      HOSTNAME: ${BASE_HOST_NAME:-$HOSTNAME}
+      # Core Settings
+      HTTPS_ONLY: 1
+      WHOOGLE_CSP: 1
+      WHOOGLE_HTTP2: 1
+      WHOOGLE_DOTENV: 0
+      WHOOGLE_AUTOCOMPLETE: 1
+      WHOOGLE_CONFIG_ANON_VIEW: 1
+      # Regional Settings
+      WHOOGLE_CONFIG_COUNTRY: ${WHOOGLE_CONFIG_COUNTRY:-US}
+      WHOOGLE_CONFIG_LANGUAGE: ${WHOOGLE_CONFIG_LANGUAGE:-lang_en}
+      WHOOGLE_CONFIG_SEARCH_LANGUAGE: ${WHOOGLE_CONFIG_SEARCH_LANGUAGE:-lang_en}
+      # UI Configuration
+      WHOOGLE_CONFIG_THEME: ${WHOOGLE_CONFIG_THEME:-dark}
+      WHOOGLE_CONFIG_RESULTS_PER_PAGE: ${WHOOGLE_CONFIG_RESULTS_PER_PAGE:-50}
+      WHOOGLE_CONFIG_NEW_TAB: 1
+      WHOOGLE_CONFIG_GET_ONLY: 0
+      WHOOGLE_CONFIG_SAFE_KEYS: 1
+      # Image Search Configuration
+      WHOOGLE_CONFIG_IMAGES: 1
+      WHOOGLE_CONFIG_VIEW_IMAGE: 1
+      WHOOGLE_SHOW_FAVICONS: 1
+      # Privacy & Security
+      WHOOGLE_CONFIG_DISABLE_FEATURES: 0
+      WHOOGLE_CONFIG_BLOCK_ADS: 1
+      WHOOGLE_CONFIG_BLOCK_CSS: 0
+      WHOOGLE_CONFIG_BLOCK_JS: 0
+      # Application Configuration
+      WHOOGLE_CONFIG_URL: https://${BASE_HOST_NAME:-$HOSTNAME}/
+      WHOOGLE_CONFIG_PREFERENCES_ENCRYPTED: 1
+      WHOOGLE_CONFIG_PREFERENCES_KEY: ${APP_SECRET_KEY:-replace-with-a-random-32-byte-hex-string}
+      # Browser Spoofing & Anti-Detection
+      WHOOGLE_USER_AGENT: ${WHOOGLE_USER_AGENT:-Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36}
+      WHOOGLE_PROXY_TYPE: ${WHOOGLE_PROXY_TYPE:-}
+      WHOOGLE_PROXY_LOC: ${WHOOGLE_PROXY_LOC:-}
+    volumes:
+      - './volumes/config/whoogle:/config:z'
+    tmpfs:
+      - /run/tor/:size=5M,uid=927,gid=927,mode=1700
+      - /var/lib/tor/:size=15M,uid=927,gid=927,mode=1700
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:5000/healthz']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.docker.network=traefik'
+      - 'traefik.http.routers.whoogle-app.entrypoints=http'
+      - 'traefik.http.routers.whoogle-app.rule=Host(`${BASE_HOST_NAME:-$HOSTNAME}`)'
+      - 'traefik.http.routers.whoogle-app.middlewares=whoogle-app-https-redirect'
+      - 'traefik.http.middlewares.whoogle-app-https-redirect.redirectscheme.scheme=https'
+      - 'traefik.http.routers.whoogle-app-secure.entrypoints=https'
+      - 'traefik.http.routers.whoogle-app-secure.rule=Host(`${BASE_HOST_NAME:-$HOSTNAME}`)'
+      - 'traefik.http.routers.whoogle-app-secure.tls.certresolver=cloudflare'
+      - 'traefik.http.routers.whoogle-app-secure.service=whoogle-app'
+      - 'traefik.http.services.whoogle-app.loadbalancer.server.port=5000'
+    networks:
+      - whoogle
+      - traefik
+
+networks:
+  whoogle:
+    name: whoogle
+    external: false
+  traefik:
+    external: true
